@@ -72,7 +72,7 @@ season-dex-project/                    ← Root folder (you are here)
 - ✅ Production build (`dist/`)
 
 ### Old Folder
-- ✅ `dex-seasonal/` folder removed
+- ✅ `season-dex-project/` folder removed
 - ✅ No duplicate files
 
 ## 🚀 How to Use
@@ -104,7 +104,7 @@ pwd
 # Output: /home/alpinist/season-dex-project
 ```
 
-All commands should now be run from this directory (no need to `cd dex-seasonal` anymore).
+All commands should now be run from this directory (no need to `cd season-dex-project` anymore).
 
 ## 🎯 What's Working
 

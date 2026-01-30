@@ -3,7 +3,6 @@
 ## Quick Start
 
 ```bash
-cd dex-seasonal
 npm run dev
 ```
 
@@ -25,10 +24,17 @@ The app will be available at `http://localhost:5174` (or another port if 5174 is
 
 ## Features Overview
 
-### 1. Seasonal Theming
+### 1. Seasonal Theming & Animations
 - The UI automatically changes based on the current season
-- Themes update every hour to catch season transitions
-- Manual theme switching can be added if needed
+- Professional animations for each season (cherry blossoms, sun rays, falling leaves, snowflakes)
+- Day/night mode with different color palettes and animations
+- Manual season preview with theme controls
+
+**Season Controls:**
+- Click season icons (🌸☀️🍂❄️) to preview any season
+- Click 🔄 to return to automatic season detection
+- Click ☀️/🌙 to toggle between day and night modes
+- Controls are located in the header next to wallet buttons
 
 **Current Season Logic:**
 - Spring: March 20 - June 20
@@ -36,85 +42,85 @@ The app will be available at `http://localhost:5174` (or another port if 5174 is
 - Fall: September 23 - December 20
 - Winter: December 21 - March 19
 
-### 2. Token Swapping
-- Select tokens from dropdown menus
-- Enter amount to swap
-- Click swap button to execute (currently shows alert, needs smart contract integration)
-- View estimated network fees and slippage
+### 2. Token Swapping (Smart Contract Integrated)
+- **Ethereum (MetaMask)**: Real swaps via Uniswap V2 Router
+- **Solana (Phantom)**: Real swaps via Jupiter Aggregator
+- Live price quotes that update automatically (500ms debounce)
+- Transaction execution with wallet confirmation
+- Transaction hash display after successful swap
+- Balance checking and validation
+
+**How to Swap:**
+1. Connect your wallet (MetaMask or Phantom)
+2. Select tokens from dropdown menus
+3. Enter amount to swap
+4. Review live quote and estimated fees
+5. Click "Swap" button
+6. Confirm transaction in your wallet
+7. Wait for confirmation and view transaction hash
 
 ### 3. Liquidity Pools
-- Add liquidity by providing two tokens
-- Remove liquidity using the slider
+- **Ethereum**: Full add/remove liquidity via Uniswap V2
+- **Solana**: UI ready (requires Raydium/Orca SDK for operations)
 - View your pool share and APY
 - Track pool tokens and earnings
+- Slider-based percentage selection for removing liquidity
+
+### 4. Responsive Design
+- Fully responsive on all devices (mobile, tablet, desktop)
+- Mobile hamburger menu for navigation
+- Touch-optimized buttons (44px minimum)
+- Fluid typography that scales with viewport
+- Breakpoints: Small Mobile (<480px), Mobile (<768px), Tablet (768-1023px), Desktop (1024-1919px), Large Desktop (1920px+)
 
 ## Next Steps for Production
 
-### 1. Smart Contract Integration
+### 1. Solana Liquidity Operations
+Currently, Solana liquidity operations show a placeholder message. To implement:
 
-#### For Ethereum (MetaMask):
 ```typescript
-// Example: Integrate with Uniswap V2 Router
-import { Contract } from 'ethers';
+// Example: Integrate with Raydium SDK
+import { Liquidity } from '@raydium-io/raydium-sdk';
 
-const UNISWAP_V2_ROUTER = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
-const routerABI = [...]; // Uniswap V2 Router ABI
-
-const router = new Contract(UNISWAP_V2_ROUTER, routerABI, signer);
-await router.swapExactTokensForTokens(
-  amountIn,
-  amountOutMin,
-  [tokenA, tokenB],
-  recipient,
-  deadline
-);
-```
-
-#### For Solana (Phantom):
-```typescript
-// Example: Integrate with Jupiter Aggregator
-import { Jupiter } from '@jup-ag/core';
-
-const jupiter = await Jupiter.load({
+// Add liquidity to Raydium pool
+const { transaction } = await Liquidity.makeAddLiquidityTransaction({
   connection,
-  cluster: 'mainnet-beta',
-  user: wallet.publicKey,
+  poolKeys,
+  userKeys,
+  amountInA,
+  amountInB,
 });
 
-const routes = await jupiter.computeRoutes({
-  inputMint: tokenA,
-  outputMint: tokenB,
-  amount: inputAmount,
-  slippage: 1,
-});
-
-const { execute } = await jupiter.exchange({ routeInfo: routes.routesInfos[0] });
-await execute();
+await wallet.sendTransaction(transaction, connection);
 ```
 
 ### 2. Token List Management
-- Add support for custom token lists
+- Add support for custom token lists (e.g., Token Lists standard)
 - Implement token search and filtering
 - Display token logos and metadata
 - Add popular token presets
+- Token whitelist/blacklist for security
 
-### 3. Price Feeds
-- Integrate with Chainlink or other oracles
+### 3. Price Charts & Analytics
+- Integrate with price feed APIs (CoinGecko, CoinMarketCap)
 - Display real-time token prices
-- Calculate price impact
+- Calculate and show price impact
 - Show historical price charts
+- Display 24h volume and market cap
 
 ### 4. Transaction Management
-- Add transaction confirmation modals
-- Show pending transaction status
-- Display transaction history
-- Implement transaction retry logic
+- Enhanced transaction confirmation modals
+- Real-time pending transaction status
+- Complete transaction history with filtering
+- Transaction retry logic for failed transactions
+- Gas price estimation and customization
 
 ### 5. Security Enhancements
-- Add input validation
-- Implement rate limiting
-- Add transaction simulation before execution
-- Display security warnings for unknown tokens
+- Enhanced input validation and sanitization
+- Rate limiting for API calls
+- Transaction simulation before execution
+- Security warnings for unknown/unverified tokens
+- Phishing protection and domain verification
 
 ## Development Tips
 
@@ -162,6 +168,13 @@ VITE_SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 - Check browser console for errors
 - Verify date/time is correct on your system
 - Clear browser cache and reload
+- Try manually selecting a season with theme controls
+
+### Animations not showing
+- Ensure JavaScript is enabled
+- Check if browser supports CSS animations
+- Try toggling between seasons to refresh animations
+- Clear browser cache
 
 ## Performance Optimization
 
@@ -190,3 +203,16 @@ npm run preview
 - ethers.js Documentation: https://docs.ethers.org
 - Solana Web3.js: https://solana-labs.github.io/solana-web3.js
 - Vite Documentation: https://vitejs.dev
+- Uniswap V2 Docs: https://docs.uniswap.org/contracts/v2/overview
+- Jupiter Aggregator: https://docs.jup.ag
+
+## Additional Documentation
+
+- `README.md` - Complete project documentation
+- `PROJECT_OVERVIEW.md` - Technical overview and architecture
+- `QUICK_START.md` - Quick start guide
+- `SMART_CONTRACT_INTEGRATION.md` - Smart contract integration details
+- `SEASONAL_ANIMATIONS_GUIDE.md` - Animation system documentation
+- `SWAP_GUIDE.md` - Token swap instructions
+- `THEME_FEATURES_SUMMARY.md` - Theme features overview
+- `CROSS_PLATFORM_GUIDE.md` - Cross-platform compatibility guide

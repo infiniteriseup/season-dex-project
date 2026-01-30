@@ -4,6 +4,7 @@ import { WalletProvider } from './contexts/WalletContext';
 import { Header } from './components/Header';
 import { SwapCard } from './components/SwapCard';
 import { LiquidityPool } from './components/LiquidityPool';
+import { SeasonalAnimations } from './components/SeasonalAnimations';
 import './App.css';
 
 function AppContent() {
@@ -16,9 +17,15 @@ function AppContent() {
         minHeight: '100vh',
         background: theme.background,
         transition: 'all 0.5s ease',
+        position: 'relative',
       }}
     >
-      <Header />
+      {/* Seasonal Animations Background */}
+      <SeasonalAnimations />
+      
+      {/* Main Content */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <Header />
 
       <main
         style={{
@@ -129,6 +136,7 @@ function AppContent() {
           Built with React, TypeScript, ethers.js, and Solana Web3.js
         </p>
       </footer>
+      </div>
     </div>
   );
 }

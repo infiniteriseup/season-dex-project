@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useWallet } from '../contexts/WalletContext';
 import { useResponsive } from '../hooks/useResponsive';
+import { ThemeControls } from './ThemeControls';
 
 export const Header: React.FC = () => {
   const { theme } = useTheme();
@@ -99,6 +100,9 @@ export const Header: React.FC = () => {
         borderTop: isMobile ? `1px solid ${theme.border}` : 'none',
         zIndex: 1000,
       }}>
+        {/* Theme Controls - Show on desktop only or at top of mobile menu */}
+        {!isMobile && <ThemeControls />}
+        
         {wallet.connected ? (
           <>
             <div
@@ -143,6 +147,13 @@ export const Header: React.FC = () => {
           </>
         ) : (
           <>
+            {/* Theme Controls on mobile - show at top */}
+            {isMobile && (
+              <div style={{ width: '100%', marginBottom: '0.5rem' }}>
+                <ThemeControls />
+              </div>
+            )}
+            
             <button
               onClick={() => {
                 connectMetaMask();

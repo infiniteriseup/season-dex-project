@@ -4,24 +4,38 @@
 
 SeasonDEX is a fully functional decentralized exchange (DEX) frontend that features:
 - **Seasonal UI theming** that automatically adapts throughout 2026
+- **Professional seasonal animations** with day/night modes for each season
+- **Interactive theme controls** for previewing all seasons and time modes
 - **Multi-wallet support** for MetaMask (Ethereum/EVM) and Phantom (Solana)
-- **Token swapping interface** with real-time balance display
+- **Smart contract integration** with Uniswap V2 (Ethereum) and Jupiter Aggregator (Solana)
+- **Real token swapping** with live quotes and transaction execution
 - **Liquidity pool management** with add/remove functionality
-- **Modern, responsive design** built with React and TypeScript
+- **Fully responsive design** optimized for mobile, tablet, and desktop
+- **Modern tech stack** built with React 19 and TypeScript 5.9
 
 ## 📁 Project Structure
 
 ```
-dex-seasonal/
+season-dex-project/
 ├── src/
 │   ├── components/
-│   │   ├── Header.tsx              # Top navigation with wallet connection
-│   │   ├── SwapCard.tsx            # Token swap interface
-│   │   └── LiquidityPool.tsx       # Liquidity management UI
+│   │   ├── Header.tsx              # Top navigation with wallet & theme controls
+│   │   ├── SwapCard.tsx            # Token swap interface with live quotes
+│   │   ├── LiquidityPool.tsx       # Liquidity management UI
+│   │   ├── ThemeControls.tsx       # Season & day/night toggle controls
+│   │   └── SeasonalAnimations.tsx  # Professional seasonal animations
 │   │
 │   ├── contexts/
-│   │   ├── ThemeContext.tsx        # Seasonal theme state management
-│   │   └── WalletContext.tsx       # Wallet connection & state
+│   │   ├── ThemeContext.tsx        # Seasonal theme & time mode state
+│   │   └── WalletContext.tsx       # Wallet connection & DEX service
+│   │
+│   ├── services/
+│   │   ├── uniswapService.ts       # Uniswap V2 integration (Ethereum)
+│   │   ├── solanaService.ts        # Jupiter Aggregator (Solana)
+│   │   └── dexService.ts           # Unified DEX interface
+│   │
+│   ├── hooks/
+│   │   └── useResponsive.ts        # Responsive breakpoint detection
 │   │
 │   ├── themes/
 │   │   └── seasons.ts              # Season definitions & auto-detection
@@ -30,7 +44,7 @@ dex-seasonal/
 │   │   └── index.ts                # TypeScript interfaces
 │   │
 │   ├── App.tsx                     # Main app component
-│   ├── App.css                     # Global styles
+│   ├── App.css                     # Global styles with responsive design
 │   └── vite-env.d.ts              # Type declarations
 │
 ├── dist/                           # Production build output
@@ -39,30 +53,49 @@ dex-seasonal/
 ├── vite.config.ts                  # Vite configuration
 ├── README.md                       # Project documentation
 ├── SETUP_GUIDE.md                  # Setup & usage instructions
-└── PROJECT_OVERVIEW.md             # This file
+├── PROJECT_OVERVIEW.md             # This file
+├── QUICK_START.md                  # Quick start guide
+├── SMART_CONTRACT_INTEGRATION.md   # Smart contract details
+├── SEASONAL_ANIMATIONS_GUIDE.md    # Animation documentation
+├── SWAP_GUIDE.md                   # Token swap instructions
+└── THEME_FEATURES_SUMMARY.md       # Theme features overview
 ```
 
-## 🎨 Seasonal Themes
+## 🎨 Seasonal Themes & Animations
 
 ### Spring (March 20 - June 20)
 - **Colors**: Fresh greens, pastels, light blues
 - **Mood**: Renewal, growth, fresh start
 - **Gradient**: Cyan → Mint → Pink
+- **Animation**: 20 floating cherry blossom petals with gentle swaying
+- **Day/Night**: Lighter pastels (day) / Deeper tones (night)
 
 ### Summer (June 21 - September 22)
 - **Colors**: Bright yellows, warm oranges, vibrant blues
 - **Mood**: Energy, warmth, vibrancy
 - **Gradient**: Yellow → Orange → Blue
+- **Animation**: Sun rays + rising particles (day) / 50+ twinkling stars (night)
+- **Day/Night**: Bright vibrant (day) / Deep blues with stars (night)
 
 ### Fall (September 23 - December 20)
 - **Colors**: Warm oranges, browns, earthy tones
 - **Mood**: Cozy, harvest, transition
 - **Gradient**: Orange → Tan → Brown
+- **Animation**: 25 tumbling autumn leaves with swinging motion
+- **Day/Night**: Warm earth tones (day) / Rich browns (night)
 
 ### Winter (December 21 - March 19)
 - **Colors**: Cool blues, whites, purples
 - **Mood**: Crisp, clean, serene
 - **Gradient**: Blue → Light Blue → Purple
+- **Animation**: 50 drifting snowflakes with shimmer effect
+- **Day/Night**: Icy blues (day) / Deep purples (night)
+
+### Theme Controls
+- **Season Selector**: Click 🌸☀️🍂❄️ to preview any season
+- **Auto Season**: Click 🔄 to return to automatic season detection
+- **Day/Night Toggle**: Click ☀️/🌙 to switch time modes
+- **Location**: Controls placed in header next to wallet buttons
 
 ## 🔌 Wallet Integration
 
@@ -92,23 +125,41 @@ dex-seasonal/
 
 ## 🔄 Core Features
 
-### 1. Token Swapping
-- **Input**: From token, amount, to token
-- **Display**: Real-time balance, slippage, network fees
-- **Action**: Swap button (ready for smart contract integration)
-- **UX**: Token switching, amount validation, wallet check
+### 1. Token Swapping (Smart Contract Integrated)
+- **Ethereum**: Uniswap V2 Router integration with real swaps
+- **Solana**: Jupiter Aggregator for best price routing
+- **Live Quotes**: Real-time price updates with 500ms debounce
+- **Transaction Execution**: Actual on-chain swaps with wallet confirmation
+- **Display**: Real-time balance, slippage, network fees, transaction hash
+- **UX**: Token switching, amount validation, wallet check, loading states
 
 ### 2. Liquidity Pools
-- **Add Liquidity**: Dual token input with balance display
+- **Add Liquidity**: Dual token input with balance display (Ethereum via Uniswap V2)
 - **Remove Liquidity**: Slider-based percentage selection
 - **Info Display**: Pool share, APY, pool tokens
 - **Tabs**: Toggle between add/remove modes
+- **Note**: Solana liquidity requires direct Raydium/Orca SDK integration
 
 ### 3. Wallet Management
 - **Connect**: One-click connection for both wallets
 - **Display**: Address (truncated), balance, wallet type
 - **Disconnect**: Clean state reset
 - **Auto-reconnect**: Handles wallet events
+- **DEX Integration**: Automatically initializes appropriate DEX service
+
+### 4. Seasonal Animations
+- **Professional Quality**: GPU-accelerated CSS animations
+- **Season-Specific**: Unique animations for each season
+- **Day/Night Modes**: Different animations for time of day
+- **Non-Intrusive**: Positioned behind content, no interaction blocking
+- **Performance**: Optimized with transform and opacity only
+
+### 5. Responsive Design
+- **Mobile First**: Optimized for all screen sizes (320px+)
+- **Breakpoints**: Small Mobile, Mobile, Tablet, Desktop, Large Desktop
+- **Touch Optimized**: 44px minimum touch targets
+- **Hamburger Menu**: Collapsible navigation on mobile
+- **Fluid Typography**: CSS clamp() for smooth scaling
 
 ## 🛠️ Technology Stack
 
@@ -118,8 +169,11 @@ dex-seasonal/
 | Language | TypeScript | 5.9.3 |
 | Build Tool | Vite | 7.2.4 |
 | Ethereum | ethers.js | 6.16.0 |
+| Ethereum DEX | @uniswap/v2-sdk | 4.5.1 |
+| Ethereum DEX | @uniswap/sdk-core | 6.0.0 |
 | Solana | @solana/web3.js | 1.98.4 |
 | Solana Wallets | @solana/wallet-adapter | 0.15.39 |
+| Solana DEX | Jupiter Aggregator API | v6 |
 | State | React Context | Built-in |
 
 ## 🚀 Getting Started
@@ -143,32 +197,35 @@ npm run preview
 ### ✅ Completed
 - [x] Project setup with Vite + React + TypeScript
 - [x] Seasonal theme system with auto-detection
+- [x] Professional seasonal animations (Spring/Summer/Fall/Winter)
+- [x] Day/night mode for each season
+- [x] Interactive theme controls (season selector, auto toggle, day/night)
 - [x] MetaMask wallet integration
 - [x] Phantom wallet integration
-- [x] Swap UI with token selection
+- [x] Uniswap V2 smart contract integration (Ethereum)
+- [x] Jupiter Aggregator integration (Solana)
+- [x] Real token swaps with live quotes
+- [x] Transaction execution and tracking
 - [x] Liquidity pool UI (add/remove)
-- [x] Responsive header with wallet display
+- [x] Liquidity operations for Ethereum (Uniswap V2)
+- [x] Fully responsive design (mobile, tablet, desktop)
+- [x] Mobile hamburger menu
+- [x] Fluid typography and touch optimization
 - [x] Balance display and formatting
 - [x] TypeScript type safety
-- [x] Production build optimization
+- [x] Production build optimization (764KB, 246KB gzipped)
 
-### 🔄 Ready for Integration
-- [ ] Uniswap V2/V3 smart contract integration (Ethereum)
-- [ ] Raydium/Orca integration (Solana)
-- [ ] Real token price feeds
-- [ ] Actual swap execution
-- [ ] Liquidity pool contract calls
-- [ ] Transaction history
-- [ ] Token list management
-
-### 🎯 Future Enhancements
+### 🔄 Future Enhancements
+- [ ] Solana liquidity operations (Raydium/Orca SDK)
+- [ ] Transaction history tracking
+- [ ] Token list management and search
 - [ ] Price charts and analytics
 - [ ] Advanced order types (limit orders)
 - [ ] Portfolio tracking
 - [ ] Multi-language support
-- [ ] Mobile app version
-- [ ] Dark/light mode toggle
+- [ ] Mobile app version (PWA)
 - [ ] Custom theme creator
+- [ ] Background images for seasonal themes
 
 ## 🔐 Security Considerations
 
@@ -190,9 +247,10 @@ npm run preview
 ## 📈 Performance
 
 ### Build Stats
-- **Bundle Size**: ~740 KB (240 KB gzipped)
-- **Build Time**: ~4 seconds
-- **Modules**: 257 transformed
+- **Bundle Size**: 764 KB (246 KB gzipped)
+- **Build Time**: ~8 seconds
+- **Modules**: 270+ transformed
+- **Animations**: GPU-accelerated (transform/opacity only)
 
 ### Optimization Opportunities
 - Code splitting for wallet adapters

@@ -5,11 +5,23 @@ A modern DEX with seasonal theming that adapts throughout 2026, supporting both 
 ## Features
 
 - **Seasonal Themes**: Automatically adapts UI based on the current season (Spring, Summer, Fall, Winter)
+- **Season Preview**: Toggle between all four seasons with beautiful animations
+- **Day/Night Mode**: Switch between day and night modes for each season
+- **Professional Animations**: 
+  - Spring: Floating cherry blossom petals
+  - Summer: Sun rays and rising particles (day) / Starry sky (night)
+  - Fall: Tumbling autumn leaves
+  - Winter: Drifting snowflakes
 - **Multi-Wallet Support**: 
   - MetaMask for Ethereum and EVM-compatible chains
   - Phantom for Solana
-- **Token Swapping**: Intuitive swap interface with real-time balance display
-- **Liquidity Pools**: Add and remove liquidity with APY tracking
+- **Smart Contract Integration**:
+  - Uniswap V2 for Ethereum token swaps
+  - Jupiter Aggregator for Solana (best price routing)
+  - Real-time quotes and price updates
+  - Automatic token approval
+- **Token Swapping**: Live token swaps with real-time quotes
+- **Liquidity Pools**: Add and remove liquidity (Ethereum)
 - **Fully Responsive Design**: Optimized for all devices and platforms
   - 📱 Mobile (iOS, Android) - 320px to 767px
   - 📱 Tablet (iPad, Android tablets) - 768px to 1023px
@@ -56,7 +68,7 @@ npm run preview
 ## Project Structure
 
 ```
-dex-seasonal/
+season-dex-project/
 ├── src/
 │   ├── components/
 │   │   ├── Header.tsx          # Navigation and wallet connection
@@ -77,12 +89,29 @@ dex-seasonal/
 
 ## Seasonal Themes
 
-The DEX automatically switches themes based on the current date:
+The DEX automatically switches themes based on the current date, with beautiful animations for each season:
 
 - **Spring** (March 20 - June 20): Fresh greens, pastels, blooming colors
+  - Animation: Floating cherry blossom petals
+  - Day/Night modes available
 - **Summer** (June 21 - September 22): Bright yellows, warm oranges, vibrant blues
+  - Animation: Sun rays and rising particles (day) / Starry sky (night)
+  - Day/Night modes available
 - **Fall** (September 23 - December 20): Warm oranges, browns, cozy autumn tones
+  - Animation: Tumbling autumn leaves
+  - Day/Night modes available
 - **Winter** (December 21 - March 19): Cool blues, whites, crisp winter colors
+  - Animation: Drifting snowflakes with shimmer effect
+  - Day/Night modes available
+
+### Theme Controls
+
+Located in the header next to wallet buttons:
+- **Season Preview**: Click 🌸☀️🍂❄️ to preview any season
+- **Auto Season**: Click 🔄 to enable automatic season detection
+- **Day/Night**: Toggle between ☀️ Day and 🌙 Night modes
+
+For more details, see [SEASONAL_ANIMATIONS_GUIDE.md](./SEASONAL_ANIMATIONS_GUIDE.md)
 
 ## Wallet Integration
 
@@ -117,13 +146,15 @@ The current implementation includes full smart contract integration for token sw
 - [x] Fully responsive design for all devices
 - [x] Integrate with Uniswap V2 for Ethereum swaps
 - [x] Integrate with Jupiter Aggregator for Solana swaps
+- [x] Seasonal animations with day/night modes
+- [x] Season preview and manual selection
 - [ ] Add Raydium/Orca direct integration for Solana liquidity
-- [ ] Add price impact and slippage calculations
-- [ ] Implement token list management
-- [ ] Add transaction history
+- [ ] Add accurate price impact calculations
+- [ ] Implement dynamic token list management
+- [ ] Add transaction history tracking
 - [ ] Implement liquidity pool analytics
 - [ ] Add multi-language support
-- [ ] Mobile app version
+- [ ] Mobile app version (PWA)
 
 ## Contributing
 

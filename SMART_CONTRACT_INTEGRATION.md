@@ -30,7 +30,7 @@ SeasonDEX now includes full smart contract integration for both Ethereum and Sol
 ## 📁 Project Structure
 
 ```
-dex-seasonal/src/services/
+season-dex-project/src/services/
 ├── uniswapService.ts      # Uniswap V2 integration
 ├── solanaService.ts       # Jupiter/Solana integration
 └── dexService.ts          # Unified DEX service

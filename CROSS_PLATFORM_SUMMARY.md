@@ -125,7 +125,6 @@ html { font-size: 16px; }                    /* Default */
 ### Quick Test (Browser DevTools)
 ```bash
 # Start development server
-cd dex-seasonal
 npm run dev
 ```
 
@@ -261,19 +260,16 @@ Complete documentation available:
 
 ### Start Development
 ```bash
-cd dex-seasonal
 npm run dev
 ```
 
 ### Build for Production
 ```bash
-cd dex-seasonal
 npm run build
 ```
 
 ### Preview Production Build
 ```bash
-cd dex-seasonal
 npm run preview
 ```
 
