@@ -165,7 +165,7 @@ export class UniswapService {
   async removeLiquidity(
     token: string,
     liquidity: string,
-    slippageTolerance: number,
+    _slippageTolerance: number,
     recipient: string
   ): Promise<ethers.TransactionResponse> {
     if (!this.routerContract || !this.signer) throw new Error('Service not initialized');

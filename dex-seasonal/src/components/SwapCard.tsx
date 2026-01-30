@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useWallet } from '../contexts/WalletContext';
+import { dexService } from '../services/dexService';
+import { ETHEREUM_TOKENS } from '../services/uniswapService';
+import { SOLANA_TOKENS } from '../services/solanaService';
 
 export const SwapCard: React.FC = () => {
   const { theme } = useTheme();
@@ -9,21 +12,109 @@ export const SwapCard: React.FC = () => {
   const [toAmount, setToAmount] = useState('');
   const [fromToken, setFromToken] = useState('ETH');
   const [toToken, setToToken] = useState('USDC');
+  const [isSwapping, setIsSwapping] = useState(false);
+  const [isLoadingQuote, setIsLoadingQuote] = useState(false);
+  const [slippage] = useState(0.5); // Fixed slippage for now
 
-  const handleSwap = () => {
+  // Get quote when amount changes
+  useEffect(() => {
+    const getQuote = async () => {
+      if (!fromAmount || parseFloat(fromAmount) === 0 || !wallet.connected) {
+        setToAmount('');
+        return;
+      }
+
+      setIsLoadingQuote(true);
+      try {
+        const tokenInAddress = getTokenAddress(fromToken);
+        const tokenOutAddress = getTokenAddress(toToken);
+        
+        const quote = await dexService.getQuote(
+          tokenInAddress,
+          tokenOutAddress,
+          fromAmount,
+          slippage
+        );
+        
+        setToAmount(parseFloat(quote.outputAmount).toFixed(6));
+      } catch (error) {
+        console.error('Quote error:', error);
+        setToAmount('0');
+      } finally {
+        setIsLoadingQuote(false);
+      }
+    };
+
+    const debounce = setTimeout(getQuote, 500);
+    return () => clearTimeout(debounce);
+  }, [fromAmount, fromToken, toToken, wallet.connected, slippage]);
+
+  const getTokenAddress = (token: string): string => {
+    if (wallet.walletType === 'metamask') {
+      if (token === 'ETH') return 'ETH';
+      return ETHEREUM_TOKENS[token as keyof typeof ETHEREUM_TOKENS] || token;
+    } else {
+      return SOLANA_TOKENS[token as keyof typeof SOLANA_TOKENS] || token;
+    }
+  };
+
+  const getAvailableTokens = () => {
+    if (wallet.walletType === 'metamask') {
+      return ['ETH', 'USDC', 'USDT', 'DAI'];
+    } else {
+      return ['SOL', 'USDC', 'USDT', 'RAY'];
+    }
+  };
+
+  const handleSwap = async () => {
     if (!wallet.connected) {
       alert('Please connect your wallet first');
       return;
     }
-    alert('Swap functionality will be integrated with smart contracts');
+
+    if (!fromAmount || parseFloat(fromAmount) === 0) {
+      alert('Please enter an amount');
+      return;
+    }
+
+    setIsSwapping(true);
+    try {
+      const tokenInAddress = getTokenAddress(fromToken);
+      const tokenOutAddress = getTokenAddress(toToken);
+
+      const result = await dexService.executeSwap(
+        tokenInAddress,
+        tokenOutAddress,
+        fromAmount,
+        slippage,
+        wallet.address!
+      );
+
+      if (result.success) {
+        alert(`✅ Swap successful!\nTransaction: ${result.txHash}`);
+        setFromAmount('');
+        setToAmount('');
+      } else {
+        alert(`❌ Swap failed: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Swap error:', error);
+      alert(`❌ Swap failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsSwapping(false);
+    }
   };
 
   const switchTokens = () => {
+    const tempToken = fromToken;
+    const tempAmount = fromAmount;
     setFromToken(toToken);
-    setToToken(fromToken);
+    setToToken(tempToken);
     setFromAmount(toAmount);
-    setToAmount(fromAmount);
+    setToAmount(tempAmount);
   };
+
+  const availableTokens = getAvailableTokens();
 
   return (
     <div
@@ -37,7 +128,14 @@ export const SwapCard: React.FC = () => {
         border: `2px solid ${theme.border}`,
       }}
     >
-      <h2 style={{ color: theme.text, marginTop: 0, marginBottom: '1.5rem', fontSize: 'clamp(1.3rem, 4vw, 1.75rem)' }}>Swap Tokens</h2>
+      <h2 style={{ color: theme.text, marginTop: 0, marginBottom: '1.5rem', fontSize: 'clamp(1.3rem, 4vw, 1.75rem)' }}>
+        Swap Tokens
+        {wallet.connected && (
+          <span style={{ fontSize: '0.7rem', marginLeft: '0.5rem', opacity: 0.7 }}>
+            ({wallet.walletType === 'metamask' ? 'Uniswap V2' : 'Jupiter'})
+          </span>
+        )}
+      </h2>
 
       {/* From Token */}
       <div
@@ -84,10 +182,9 @@ export const SwapCard: React.FC = () => {
               cursor: 'pointer',
             }}
           >
-            <option value="ETH">ETH</option>
-            <option value="SOL">SOL</option>
-            <option value="USDC">USDC</option>
-            <option value="USDT">USDT</option>
+            {availableTokens.map(token => (
+              <option key={token} value={token}>{token}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -134,8 +231,8 @@ export const SwapCard: React.FC = () => {
           <input
             type="number"
             value={toAmount}
-            onChange={(e) => setToAmount(e.target.value)}
-            placeholder="0.0"
+            readOnly
+            placeholder={isLoadingQuote ? 'Loading...' : '0.0'}
             style={{
               flex: '1 1 150px',
               minWidth: '0',
@@ -160,10 +257,9 @@ export const SwapCard: React.FC = () => {
               cursor: 'pointer',
             }}
           >
-            <option value="USDC">USDC</option>
-            <option value="USDT">USDT</option>
-            <option value="ETH">ETH</option>
-            <option value="SOL">SOL</option>
+            {availableTokens.map(token => (
+              <option key={token} value={token}>{token}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -171,25 +267,34 @@ export const SwapCard: React.FC = () => {
       {/* Swap Button */}
       <button
         onClick={handleSwap}
-        disabled={!wallet.connected || !fromAmount}
+        disabled={!wallet.connected || !fromAmount || isSwapping || isLoadingQuote}
         style={{
           width: '100%',
           padding: 'clamp(0.85rem, 3vw, 1rem)',
-          background: wallet.connected && fromAmount ? theme.gradient : theme.border,
+          background: wallet.connected && fromAmount && !isSwapping ? theme.gradient : theme.border,
           color: 'white',
           border: 'none',
           borderRadius: '16px',
           fontSize: 'clamp(1rem, 3vw, 1.1rem)',
           fontWeight: 'bold',
-          cursor: wallet.connected && fromAmount ? 'pointer' : 'not-allowed',
+          cursor: wallet.connected && fromAmount && !isSwapping ? 'pointer' : 'not-allowed',
           transition: 'transform 0.2s',
+          opacity: isSwapping || isLoadingQuote ? 0.7 : 1,
         }}
         onMouseOver={(e) =>
-          wallet.connected && fromAmount && (e.currentTarget.style.transform = 'scale(1.02)')
+          wallet.connected && fromAmount && !isSwapping && (e.currentTarget.style.transform = 'scale(1.02)')
         }
         onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
       >
-        {!wallet.connected ? 'Connect Wallet' : !fromAmount ? 'Enter Amount' : 'Swap'}
+        {!wallet.connected 
+          ? 'Connect Wallet' 
+          : !fromAmount 
+          ? 'Enter Amount' 
+          : isSwapping 
+          ? '⏳ Swapping...' 
+          : isLoadingQuote
+          ? '⏳ Loading...'
+          : 'Swap'}
       </button>
 
       {/* Info */}
@@ -205,11 +310,19 @@ export const SwapCard: React.FC = () => {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
           <span>Slippage Tolerance</span>
-          <span style={{ fontWeight: 'bold' }}>0.5%</span>
+          <span style={{ fontWeight: 'bold' }}>{slippage}%</span>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+          <span>Minimum Received</span>
+          <span style={{ fontWeight: 'bold' }}>
+            {toAmount ? (parseFloat(toAmount) * (1 - slippage / 100)).toFixed(6) : '0'} {toToken}
+          </span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span>Network Fee</span>
-          <span style={{ fontWeight: 'bold' }}>~$2.50</span>
+          <span>DEX</span>
+          <span style={{ fontWeight: 'bold' }}>
+            {wallet.walletType === 'metamask' ? 'Uniswap V2' : 'Jupiter Aggregator'}
+          </span>
         </div>
       </div>
     </div>

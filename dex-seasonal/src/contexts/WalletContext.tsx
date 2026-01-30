@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { ethers } from 'ethers';
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import type { WalletState } from '../types';
+import { dexService } from '../services/dexService';
 
 interface WalletContextType {
   wallet: WalletState;
@@ -39,6 +40,9 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       const network = await provider.getNetwork();
       const balance = await provider.getBalance(accounts[0]);
 
+      // Initialize DEX service for Ethereum
+      await dexService.initializeEthereum(provider);
+
       setWallet({
         address: accounts[0],
         chainId: Number(network.chainId),
@@ -46,6 +50,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         connected: true,
         walletType: 'metamask',
       });
+
+      console.log('✅ MetaMask connected and DEX service initialized');
     } catch (error) {
       console.error('MetaMask connection error:', error);
       alert('Failed to connect to MetaMask');
@@ -70,6 +76,9 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       const connection = new Connection(clusterApiUrl('mainnet-beta'));
       const balance = await connection.getBalance(new PublicKey(publicKey));
 
+      // Initialize DEX service for Solana
+      dexService.initializeSolana(clusterApiUrl('mainnet-beta'));
+
       setWallet({
         address: publicKey,
         chainId: null,
@@ -77,6 +86,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         connected: true,
         walletType: 'phantom',
       });
+
+      console.log('✅ Phantom connected and DEX service initialized');
     } catch (error) {
       console.error('Phantom connection error:', error);
       alert('Failed to connect to Phantom');
@@ -87,6 +98,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   const disconnect = () => {
     setWallet(initialWalletState);
+    console.log('🔌 Wallet disconnected');
   };
 
   useEffect(() => {

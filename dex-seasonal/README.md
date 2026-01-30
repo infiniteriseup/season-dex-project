@@ -98,16 +98,26 @@ The DEX automatically switches themes based on the current date:
 
 ## Smart Contract Integration
 
-The current implementation includes UI components ready for smart contract integration. To connect to actual DEX protocols:
+### Ethereum (MetaMask)
+- **Protocol**: Uniswap V2
+- **Features**: Token swaps, Add/Remove liquidity
+- **Supported Tokens**: ETH, USDC, USDT, DAI
+- **Network**: Ethereum Mainnet
 
-1. **For Ethereum**: Integrate with Uniswap V2/V3 or similar AMM protocols
-2. **For Solana**: Integrate with Raydium, Orca, or Jupiter aggregator
+### Solana (Phantom)
+- **Protocol**: Jupiter Aggregator (Raydium, Orca, and more)
+- **Features**: Token swaps with best price routing
+- **Supported Tokens**: SOL, USDC, USDT, RAY
+- **Network**: Solana Mainnet-Beta
+
+The current implementation includes full smart contract integration for token swapping. Liquidity operations are available for Ethereum. For detailed information, see [SMART_CONTRACT_INTEGRATION.md](./SMART_CONTRACT_INTEGRATION.md).
 
 ## Development Roadmap
 
 - [x] Fully responsive design for all devices
-- [ ] Integrate with Uniswap V2/V3 for Ethereum swaps
-- [ ] Integrate with Raydium/Orca for Solana swaps
+- [x] Integrate with Uniswap V2 for Ethereum swaps
+- [x] Integrate with Jupiter Aggregator for Solana swaps
+- [ ] Add Raydium/Orca direct integration for Solana liquidity
 - [ ] Add price impact and slippage calculations
 - [ ] Implement token list management
 - [ ] Add transaction history
