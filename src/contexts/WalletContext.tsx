@@ -11,6 +11,7 @@ interface WalletContextType {
   connectPhantom: () => Promise<void>;
   disconnect: () => void;
   isConnecting: boolean;
+  dexService: typeof dexService;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -131,7 +132,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   }, [wallet.walletType]);
 
   return (
-    <WalletContext.Provider value={{ wallet, connectMetaMask, connectPhantom, disconnect, isConnecting }}>
+    <WalletContext.Provider value={{ wallet, connectMetaMask, connectPhantom, disconnect, isConnecting, dexService }}>
       {children}
     </WalletContext.Provider>
   );

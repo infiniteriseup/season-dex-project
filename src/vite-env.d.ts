@@ -1,6 +1,11 @@
 /// <reference types="vite/client" />
 
-interface Window {
-  ethereum?: any;
-  solana?: any;
+declare global {
+  interface Window {
+    ethereum?: any;
+    solana?: any;
+    Buffer: any;
+  }
 }
+
+export {};

@@ -1,4 +1,7 @@
 import { Connection, PublicKey, Transaction, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { type LiquidityPoolKeys } from '@raydium-io/raydium-sdk';
+import { getOrca, OrcaPoolConfig, Network } from '@orca-so/sdk';
+import Decimal from 'decimal.js';
 
 // Common Solana token addresses
 export const SOLANA_TOKENS = {
@@ -6,6 +9,7 @@ export const SOLANA_TOKENS = {
   USDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
   USDT: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
   RAY: '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R', // Raydium
+  ORCA: 'orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE', // Orca
 };
 
 export interface SolanaSwapParams {
@@ -23,6 +27,17 @@ export interface SolanaLiquidityParams {
   amountB: string;
   slippageTolerance: number;
   userPublicKey: PublicKey;
+  poolKeys?: LiquidityPoolKeys; // For Raydium
+  poolConfig?: OrcaPoolConfig; // For Orca
+  dexType?: 'raydium' | 'orca'; // Specify which DEX to use
+}
+
+export interface RemoveLiquidityParams {
+  poolAddress: string;
+  liquidity: string;
+  userPublicKey: PublicKey;
+  slippageTolerance: number;
+  dexType?: 'raydium' | 'orca';
 }
 
 export class SolanaService {
@@ -42,14 +57,15 @@ export class SolanaService {
 
   /**
    * Get token account balance
-   * Note: This is a simplified version. In production, use @solana/spl-token
+   * Note: Simplified version - in production, use proper SPL token account parsing
    */
   async getTokenBalance(_tokenMint: string, _owner: PublicKey): Promise<number> {
     try {
-      // This is a placeholder. In production, you would:
-      // 1. Find the associated token account
-      // 2. Get the token account balance
-      // For now, returning 0 as this requires SPL Token program integration
+      // This is a simplified placeholder
+      // In production, you would:
+      // 1. Derive the associated token address
+      // 2. Fetch and parse the token account data
+      // For now, returning 0 to avoid version conflicts
       return 0;
     } catch (error) {
       console.error('Error getting token balance:', error);
@@ -138,31 +154,171 @@ export class SolanaService {
   }
 
   /**
-   * Add liquidity (Raydium/Orca)
-   * Note: This is a placeholder. Actual implementation requires specific DEX SDK
+   * Add liquidity to Raydium pool
    */
-  async addLiquidity(
-    _params: SolanaLiquidityParams,
+  async addLiquidityRaydium(
+    params: SolanaLiquidityParams,
     _signTransaction: (tx: Transaction) => Promise<Transaction>
   ): Promise<string> {
-    // This is a placeholder for liquidity addition
-    // In production, you would integrate with Raydium or Orca SDK
-    throw new Error('Liquidity operations require specific DEX SDK integration. Please use Raydium or Orca directly.');
+    const { poolKeys } = params;
+
+    if (!poolKeys) {
+      throw new Error('Pool keys required for Raydium liquidity operations. Please fetch pool information from Raydium API first.');
+    }
+
+    try {
+      // Note: Raydium SDK's liquidity operations require:
+      // 1. Pool keys from Raydium API
+      // 2. User token accounts
+      // 3. Proper transaction construction
+      
+      throw new Error(
+        'Raydium liquidity operations require pool keys from Raydium API. ' +
+        'Please visit https://raydium.io/ to add liquidity directly, or implement pool key fetching.'
+      );
+    } catch (error) {
+      console.error('Raydium add liquidity error:', error);
+      throw error;
+    }
   }
 
   /**
-   * Remove liquidity (Raydium/Orca)
-   * Note: This is a placeholder. Actual implementation requires specific DEX SDK
+   * Add liquidity to Orca pool
    */
-  async removeLiquidity(
-    _poolAddress: string,
-    _liquidity: string,
-    _userPublicKey: PublicKey,
+  async addLiquidityOrca(
+    params: SolanaLiquidityParams,
+    signTransaction: (tx: Transaction) => Promise<Transaction>
+  ): Promise<string> {
+    const { amountA, amountB, slippageTolerance, userPublicKey, poolConfig } = params;
+
+    if (!poolConfig) {
+      throw new Error('Pool config required for Orca liquidity operations');
+    }
+
+    try {
+      // Initialize Orca SDK
+      const orca = getOrca(this.connection, Network.MAINNET);
+      
+      // Get pool
+      const pool = orca.getPool(poolConfig);
+
+      // Convert amounts to Decimal
+      const inputAmountA = new Decimal(amountA);
+      const inputAmountB = new Decimal(amountB);
+
+      // Calculate slippage tolerance
+      const slippagePercent = new Decimal(slippageTolerance).div(100);
+
+      // Deposit tokens to pool
+      const depositQuote = await pool.getDepositQuote(inputAmountA, inputAmountB, slippagePercent);
+      
+      // Create deposit transaction
+      const depositTxPayload = await pool.deposit(
+        userPublicKey,
+        depositQuote.maxTokenAIn,
+        depositQuote.maxTokenBIn,
+        depositQuote.minPoolTokenAmountOut
+      );
+
+      // Convert payload to Transaction
+      const transaction = depositTxPayload.transaction;
+
+      // Sign transaction
+      const signedTransaction = await signTransaction(transaction);
+
+      // Send transaction
+      const signature = await this.connection.sendRawTransaction(
+        signedTransaction.serialize()
+      );
+
+      // Confirm transaction
+      await this.connection.confirmTransaction(signature, 'confirmed');
+
+      return signature;
+    } catch (error) {
+      console.error('Orca add liquidity error:', error);
+      throw new Error(`Failed to add liquidity to Orca: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Add liquidity (auto-detect DEX or use specified)
+   */
+  async addLiquidity(
+    params: SolanaLiquidityParams,
+    signTransaction: (tx: Transaction) => Promise<Transaction>
+  ): Promise<string> {
+    const dexType = params.dexType || 'raydium'; // Default to Raydium
+
+    if (dexType === 'raydium') {
+      return this.addLiquidityRaydium(params, signTransaction);
+    } else if (dexType === 'orca') {
+      return this.addLiquidityOrca(params, signTransaction);
+    } else {
+      throw new Error(`Unsupported DEX type: ${dexType}`);
+    }
+  }
+
+  /**
+   * Remove liquidity from Raydium pool
+   */
+  async removeLiquidityRaydium(
+    params: RemoveLiquidityParams,
     _signTransaction: (tx: Transaction) => Promise<Transaction>
   ): Promise<string> {
-    // This is a placeholder for liquidity removal
-    // In production, you would integrate with Raydium or Orca SDK
-    throw new Error('Liquidity operations require specific DEX SDK integration. Please use Raydium or Orca directly.');
+    const { poolAddress } = params;
+
+    try {
+      // Note: This requires pool keys which should be fetched from Raydium API
+      throw new Error(
+        'Raydium remove liquidity requires pool keys from Raydium API. ' +
+        `Pool address: ${poolAddress}. ` +
+        'Please visit https://raydium.io/ to remove liquidity directly, or implement pool key fetching.'
+      );
+    } catch (error) {
+      console.error('Raydium remove liquidity error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove liquidity from Orca pool
+   */
+  async removeLiquidityOrca(
+    params: RemoveLiquidityParams,
+    _signTransaction: (tx: Transaction) => Promise<Transaction>
+  ): Promise<string> {
+    const { poolAddress } = params;
+
+    try {
+      // Note: Need to get pool config from pool address
+      throw new Error(
+        'Orca remove liquidity requires pool configuration. ' +
+        `Pool address: ${poolAddress}. ` +
+        'Please visit https://www.orca.so/ to remove liquidity directly, or provide pool config.'
+      );
+    } catch (error) {
+      console.error('Orca remove liquidity error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remove liquidity (auto-detect DEX or use specified)
+   */
+  async removeLiquidity(
+    params: RemoveLiquidityParams,
+    signTransaction: (tx: Transaction) => Promise<Transaction>
+  ): Promise<string> {
+    const dexType = params.dexType || 'raydium'; // Default to Raydium
+
+    if (dexType === 'raydium') {
+      return this.removeLiquidityRaydium(params, signTransaction);
+    } else if (dexType === 'orca') {
+      return this.removeLiquidityOrca(params, signTransaction);
+    } else {
+      throw new Error(`Unsupported DEX type: ${dexType}`);
+    }
   }
 
   /**

@@ -152,18 +152,20 @@ export class DEXService {
    * Add liquidity to a pool
    */
   async addLiquidity(
-    token: string,
-    amountToken: string,
-    amountETHOrSOL: string,
+    tokenA: string,
+    tokenB: string,
+    amountA: string,
+    amountB: string,
     slippageTolerance: number,
     recipient: string
   ): Promise<SwapResult> {
     try {
       if (this.walletType === 'metamask' && this.uniswapService) {
+        // For Ethereum, use existing Uniswap implementation
         const params: EthLiquidityParams = {
-          token,
-          amountToken,
-          amountETH: amountETHOrSOL,
+          token: tokenA, // Assuming tokenA is the ERC20 token
+          amountToken: amountA,
+          amountETH: amountB, // Assuming tokenB is ETH
           slippageTolerance,
           recipient,
         };
@@ -178,10 +180,35 @@ export class DEXService {
       }
 
       if (this.walletType === 'phantom' && this.solanaService) {
-        // Solana liquidity operations require specific DEX SDK
+        // Get Phantom wallet
+        const { solana } = window as any;
+        if (!solana?.isPhantom) {
+          throw new Error('Phantom wallet not found');
+        }
+
+        const publicKey = new PublicKey(recipient);
+        
+        // For Solana, use Raydium by default
+        // Note: In production, you would fetch pool keys from Raydium API
+        const params = {
+          tokenA,
+          tokenB,
+          amountA,
+          amountB,
+          slippageTolerance,
+          userPublicKey: publicKey,
+          dexType: 'raydium' as const,
+          // poolKeys would be fetched from Raydium API in production
+        };
+
+        const signature = await this.solanaService.addLiquidity(params, async (tx: Transaction) => {
+          const signed = await solana.signTransaction(tx);
+          return signed;
+        });
+
         return {
-          success: false,
-          error: 'Solana liquidity operations require direct integration with Raydium or Orca. Please use their official interfaces.',
+          success: true,
+          txHash: signature,
         };
       }
 
@@ -199,15 +226,16 @@ export class DEXService {
    * Remove liquidity from a pool
    */
   async removeLiquidity(
-    token: string,
+    poolAddress: string,
     liquidity: string,
     slippageTolerance: number,
     recipient: string
   ): Promise<SwapResult> {
     try {
       if (this.walletType === 'metamask' && this.uniswapService) {
+        // For Ethereum, use existing Uniswap implementation
         const tx = await this.uniswapService.removeLiquidity(
-          token,
+          poolAddress, // This is the token address in Uniswap context
           liquidity,
           slippageTolerance,
           recipient
@@ -221,10 +249,31 @@ export class DEXService {
       }
 
       if (this.walletType === 'phantom' && this.solanaService) {
-        // Solana liquidity operations require specific DEX SDK
+        // Get Phantom wallet
+        const { solana } = window as any;
+        if (!solana?.isPhantom) {
+          throw new Error('Phantom wallet not found');
+        }
+
+        const publicKey = new PublicKey(recipient);
+        
+        // For Solana, use Raydium by default
+        const params = {
+          poolAddress,
+          liquidity,
+          userPublicKey: publicKey,
+          slippageTolerance,
+          dexType: 'raydium' as const,
+        };
+
+        const signature = await this.solanaService.removeLiquidity(params, async (tx: Transaction) => {
+          const signed = await solana.signTransaction(tx);
+          return signed;
+        });
+
         return {
-          success: false,
-          error: 'Solana liquidity operations require direct integration with Raydium or Orca. Please use their official interfaces.',
+          success: true,
+          txHash: signature,
         };
       }
 

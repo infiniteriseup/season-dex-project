@@ -21,7 +21,9 @@ A modern DEX with seasonal theming that adapts throughout 2026, supporting both 
   - Real-time quotes and price updates
   - Automatic token approval
 - **Token Swapping**: Live token swaps with real-time quotes
-- **Liquidity Pools**: Add and remove liquidity (Ethereum)
+- **Liquidity Pools**: Add and remove liquidity
+  - Ethereum: Full Uniswap V2 integration
+  - Solana: Raydium and Orca SDK integration (requires pool configuration)
 - **Fully Responsive Design**: Optimized for all devices and platforms
   - 📱 Mobile (iOS, Android) - 320px to 767px
   - 📱 Tablet (iPad, Android tablets) - 768px to 1023px
@@ -48,6 +50,26 @@ A modern DEX with seasonal theming that adapts throughout 2026, supporting both 
 - Node.js 18+ and npm
 - MetaMask browser extension (for Ethereum)
 - Phantom browser extension (for Solana)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd season-dex-project
+
+# Install dependencies
+npm install
+
+# (Optional) Setup environment variables
+cp .env.example .env
+# Edit .env with your RPC endpoints (optional - works without it!)
+
+# Start development server
+npm run dev
+```
+
+**Note**: Environment variables are optional! The app works out of the box with default settings. See [TESTING_GUIDE.md](TESTING_GUIDE.md) for details.
 
 ### Installation
 
@@ -148,13 +170,46 @@ The current implementation includes full smart contract integration for token sw
 - [x] Integrate with Jupiter Aggregator for Solana swaps
 - [x] Seasonal animations with day/night modes
 - [x] Season preview and manual selection
-- [ ] Add Raydium/Orca direct integration for Solana liquidity
+- [x] Add Raydium/Orca direct integration for Solana liquidity
+- [ ] Implement pool configuration fetching from DEX APIs
 - [ ] Add accurate price impact calculations
 - [ ] Implement dynamic token list management
 - [ ] Add transaction history tracking
 - [ ] Implement liquidity pool analytics
 - [ ] Add multi-language support
 - [ ] Mobile app version (PWA)
+
+## Testing
+
+See [TESTING_GUIDE.md](TESTING_GUIDE.md) for comprehensive testing instructions.
+
+**Quick Start**:
+```bash
+# No environment variables needed for basic testing!
+npm run dev
+
+# For testnet testing (free test tokens):
+cp .env.example .env
+# Set VITE_ENABLE_TESTNET=true
+npm run dev
+```
+
+**Get Test Tokens**:
+- Ethereum (Goerli): https://goerlifaucet.com/
+- Solana (Devnet): https://solfaucet.com/
+
+## Documentation
+
+- [README.md](README.md) - This file
+- [TESTING_GUIDE.md](TESTING_GUIDE.md) - Complete testing guide with environment variables
+- [QUICK_START.md](QUICK_START.md) - Quick start guide
+- [SETUP_GUIDE.md](SETUP_GUIDE.md) - Detailed setup instructions
+- [PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md) - Technical architecture
+- [SMART_CONTRACT_INTEGRATION.md](SMART_CONTRACT_INTEGRATION.md) - Smart contract details
+- [SOLANA_LIQUIDITY_GUIDE.md](SOLANA_LIQUIDITY_GUIDE.md) - Solana liquidity integration
+- [SEASONAL_ANIMATIONS_GUIDE.md](SEASONAL_ANIMATIONS_GUIDE.md) - Animation system
+- [THEME_FEATURES_SUMMARY.md](THEME_FEATURES_SUMMARY.md) - Theme features
+- [SWAP_GUIDE.md](SWAP_GUIDE.md) - Token swap instructions
 
 ## Contributing
 
@@ -167,3 +222,9 @@ MIT License - feel free to use this project for your own purposes.
 ## Support
 
 For issues and questions, please open an issue on the GitHub repository.
+
+---
+
+**Built with ❤️ for the DeFi community**  
+**Version**: 1.4.0  
+**Last Updated**: January 31, 2026

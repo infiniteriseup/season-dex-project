@@ -4,25 +4,104 @@ import { useWallet } from '../contexts/WalletContext';
 
 export const LiquidityPool: React.FC = () => {
   const { theme } = useTheme();
-  const { wallet } = useWallet();
+  const { wallet, dexService } = useWallet();
   const [token1Amount, setToken1Amount] = useState('');
   const [token2Amount, setToken2Amount] = useState('');
   const [activeTab, setActiveTab] = useState<'add' | 'remove'>('add');
+  const [loading, setLoading] = useState(false);
+  const [removePercentage, setRemovePercentage] = useState(50);
 
-  const handleAddLiquidity = () => {
+  const handleAddLiquidity = async () => {
     if (!wallet.connected) {
       alert('Please connect your wallet first');
       return;
     }
-    alert('Add liquidity functionality will be integrated with smart contracts');
+
+    if (!token1Amount || !token2Amount) {
+      alert('Please enter amounts for both tokens');
+      return;
+    }
+
+    if (!dexService) {
+      alert('DEX service not initialized');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // For demo purposes, using common token addresses
+      // In production, these would be selected by the user
+      const tokenA = wallet.walletType === 'metamask' 
+        ? '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' // WETH
+        : 'So11111111111111111111111111111111111111112'; // SOL
+      
+      const tokenB = wallet.walletType === 'metamask'
+        ? '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' // USDC on Ethereum
+        : 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'; // USDC on Solana
+
+      const result = await dexService.addLiquidity(
+        tokenA,
+        tokenB,
+        token1Amount,
+        token2Amount,
+        0.5, // 0.5% slippage
+        wallet.address || ''
+      );
+
+      if (result.success) {
+        alert(`Liquidity added successfully!\nTransaction: ${result.txHash}`);
+        setToken1Amount('');
+        setToken2Amount('');
+      } else {
+        alert(`Failed to add liquidity: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Add liquidity error:', error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRemoveLiquidity = () => {
+  const handleRemoveLiquidity = async () => {
     if (!wallet.connected) {
       alert('Please connect your wallet first');
       return;
     }
-    alert('Remove liquidity functionality will be integrated with smart contracts');
+
+    if (!dexService) {
+      alert('DEX service not initialized');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // For demo purposes, using a placeholder pool address
+      // In production, this would be fetched from the user's liquidity positions
+      const poolAddress = wallet.walletType === 'metamask'
+        ? '0x0000000000000000000000000000000000000000' // Placeholder
+        : '11111111111111111111111111111111'; // Placeholder
+
+      const liquidityAmount = '0'; // Would be calculated based on percentage
+
+      const result = await dexService.removeLiquidity(
+        poolAddress,
+        liquidityAmount,
+        0.5, // 0.5% slippage
+        wallet.address || ''
+      );
+
+      if (result.success) {
+        alert(`Liquidity removed successfully!\nTransaction: ${result.txHash}`);
+      } else {
+        alert(`Failed to remove liquidity: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Remove liquidity error:', error);
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -190,23 +269,26 @@ export const LiquidityPool: React.FC = () => {
 
           <button
             onClick={handleAddLiquidity}
-            disabled={!wallet.connected || !token1Amount || !token2Amount}
+            disabled={!wallet.connected || !token1Amount || !token2Amount || loading}
             style={{
               width: '100%',
               padding: 'clamp(0.85rem, 3vw, 1rem)',
               background:
-                wallet.connected && token1Amount && token2Amount ? theme.gradient : theme.border,
+                wallet.connected && token1Amount && token2Amount && !loading ? theme.gradient : theme.border,
               color: 'white',
               border: 'none',
               borderRadius: '16px',
               fontSize: 'clamp(1rem, 3vw, 1.1rem)',
               fontWeight: 'bold',
               cursor:
-                wallet.connected && token1Amount && token2Amount ? 'pointer' : 'not-allowed',
+                wallet.connected && token1Amount && token2Amount && !loading ? 'pointer' : 'not-allowed',
               transition: 'transform 0.2s',
+              opacity: loading ? 0.7 : 1,
             }}
           >
-            {!wallet.connected
+            {loading
+              ? 'Processing...'
+              : !wallet.connected
               ? 'Connect Wallet'
               : !token1Amount || !token2Amount
               ? 'Enter Amounts'
@@ -231,7 +313,8 @@ export const LiquidityPool: React.FC = () => {
               type="range"
               min="0"
               max="100"
-              defaultValue="50"
+              value={removePercentage}
+              onChange={(e) => setRemovePercentage(parseInt(e.target.value))}
               style={{
                 width: '100%',
                 marginBottom: '1rem',
@@ -246,7 +329,7 @@ export const LiquidityPool: React.FC = () => {
               }}
             >
               <span>0%</span>
-              <span style={{ fontWeight: 'bold', fontSize: 'clamp(1rem, 3vw, 1.2rem)', color: theme.text }}>50%</span>
+              <span style={{ fontWeight: 'bold', fontSize: 'clamp(1rem, 3vw, 1.2rem)', color: theme.text }}>{removePercentage}%</span>
               <span>100%</span>
             </div>
           </div>
@@ -270,21 +353,22 @@ export const LiquidityPool: React.FC = () => {
 
           <button
             onClick={handleRemoveLiquidity}
-            disabled={!wallet.connected}
+            disabled={!wallet.connected || loading}
             style={{
               width: '100%',
               padding: 'clamp(0.85rem, 3vw, 1rem)',
-              background: wallet.connected ? theme.gradient : theme.border,
+              background: wallet.connected && !loading ? theme.gradient : theme.border,
               color: 'white',
               border: 'none',
               borderRadius: '16px',
               fontSize: 'clamp(1rem, 3vw, 1.1rem)',
               fontWeight: 'bold',
-              cursor: wallet.connected ? 'pointer' : 'not-allowed',
+              cursor: wallet.connected && !loading ? 'pointer' : 'not-allowed',
               transition: 'transform 0.2s',
+              opacity: loading ? 0.7 : 1,
             }}
           >
-            {!wallet.connected ? 'Connect Wallet' : 'Remove Liquidity'}
+            {loading ? 'Processing...' : !wallet.connected ? 'Connect Wallet' : 'Remove Liquidity'}
           </button>
         </>
       )}
