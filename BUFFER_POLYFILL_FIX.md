@@ -15,86 +15,46 @@ This happens because Solana Web3.js and related libraries (Raydium, Orca) use No
 
 ## Solution Applied
 
-### 1. Installed Buffer Package
+### 1. Installed Required Packages
 
 ```bash
 npm install buffer --save
+npm install --save-dev vite-plugin-node-polyfills
 ```
 
 ### 2. Updated `vite.config.ts`
 
-Added Buffer polyfill configuration:
+Used the vite-plugin-node-polyfills plugin for automatic polyfills:
 
 ```typescript
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
-  plugins: [react()],
-  define: {
-    'global': 'globalThis',
-  },
-  resolve: {
-    alias: {
-      buffer: 'buffer',
-    },
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      define: {
-        global: 'globalThis',
-      },
-    },
-  },
+  plugins: [
+    react(),
+    nodePolyfills({
+      protocolImports: true,
+    }),
+  ],
 })
 ```
 
-### 3. Updated `src/main.tsx`
-
-Added Buffer polyfill to window object:
-
-```typescript
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-import { Buffer } from 'buffer'
-
-// Polyfill Buffer for Solana Web3.js
-window.Buffer = Buffer
-
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
-```
-
-### 4. Updated `src/vite-env.d.ts`
-
-Added TypeScript declaration for window.Buffer:
-
-```typescript
-/// <reference types="vite/client" />
-
-declare global {
-  interface Window {
-    ethereum?: any;
-    solana?: any;
-    Buffer: any;
-  }
-}
-
-export {};
-```
+This plugin automatically provides polyfills for:
+- Buffer
+- process
+- global
+- And other Node.js built-ins
 
 ## Result
 
 ✅ **Fixed!** The app now runs without Buffer errors.
 
 - Dev server: http://localhost:5175/
-- Build: Successful (1.74MB, 527KB gzipped)
+- Build: Successful
 - TypeScript: No errors
+- UI: Fully functional with seasonal animations!
 
 ## Why This Happens
 
