@@ -7,15 +7,9 @@ import { LiquidityPool } from './components/LiquidityPool';
 import { SeasonalAnimations } from './components/SeasonalAnimations';
 import './App.css';
 
-console.log('📱 App.tsx loaded');
-
 function AppContent() {
-  console.log('🎨 AppContent rendering...');
   const { theme } = useTheme();
   const [activeView, setActiveView] = useState<'swap' | 'liquidity'>('swap');
-
-  console.log('✅ Theme:', theme.name);
-  console.log('✅ Active view:', activeView);
 
   return (
     <div
@@ -148,25 +142,13 @@ function AppContent() {
 }
 
 function App() {
-  console.log('🚀 App component rendering...');
-  
-  try {
-    return (
-      <ThemeProvider>
-        <WalletProvider>
-          <AppContent />
-        </WalletProvider>
-      </ThemeProvider>
-    );
-  } catch (error) {
-    console.error('❌ Error in App:', error);
-    return (
-      <div style={{ padding: '50px', color: 'red', fontSize: '20px' }}>
-        <h1>Error Loading App</h1>
-        <pre>{String(error)}</pre>
-      </div>
-    );
-  }
+  return (
+    <ThemeProvider>
+      <WalletProvider>
+        <AppContent />
+      </WalletProvider>
+    </ThemeProvider>
+  );
 }
 
 export default App;
