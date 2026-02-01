@@ -104,16 +104,21 @@ function AppContent() {
           <h3
             style={{
               margin: '0 0 0.5rem 0',
-              background: theme.gradient,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: theme.text,
               textTransform: 'capitalize',
               fontSize: 'clamp(1.2rem, 3vw, 1.5rem)',
+              fontWeight: 'bold',
+              textShadow: '0 2px 4px rgba(0,0,0,0.1)',
             }}
           >
             {theme.name} Season 2026
           </h3>
-          <p style={{ margin: 0, color: theme.textSecondary, fontSize: 'clamp(0.8rem, 2vw, 0.9rem)' }}>
+          <p style={{ 
+            margin: 0, 
+            color: theme.text, 
+            fontSize: 'clamp(0.8rem, 2vw, 0.9rem)',
+            opacity: 0.8,
+          }}>
             Experience the beauty of decentralized trading with seasonal themes that adapt throughout
             the year
           </p>
@@ -125,14 +130,15 @@ function AppContent() {
         style={{
           textAlign: 'center',
           padding: 'clamp(1rem, 3vw, 2rem)',
-          color: theme.textSecondary,
+          color: theme.text,
           fontSize: 'clamp(0.75rem, 2vw, 0.9rem)',
+          opacity: 0.8,
         }}
       >
         <p style={{ margin: '0 0 0.5rem 0' }}>
           SeasonDEX - Multi-chain DEX supporting MetaMask (Ethereum) and Phantom (Solana)
         </p>
-        <p style={{ fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)', margin: 0 }}>
+        <p style={{ fontSize: 'clamp(0.7rem, 1.5vw, 0.8rem)', margin: 0, opacity: 0.7 }}>
           Built with React, TypeScript, ethers.js, and Solana Web3.js
         </p>
       </footer>
