@@ -39,27 +39,27 @@ export const Header: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.5rem, 2vw, 1rem)', flex: '1 1 auto' }}>
         <h1
           style={{
-            background: theme.gradient,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
+            color: theme.text,
             fontSize: 'clamp(1.5rem, 4vw, 2rem)',
             fontWeight: 'bold',
             margin: 0,
             whiteSpace: 'nowrap',
+            textShadow: '0 2px 4px rgba(0,0,0,0.1)',
           }}
         >
           SeasonDEX
         </h1>
         <span
           style={{
-            color: theme.textSecondary,
+            color: theme.text,
             fontSize: 'clamp(0.75rem, 2vw, 0.9rem)',
             textTransform: 'capitalize',
             padding: '0.25rem 0.75rem',
-            background: theme.primary + '20',
+            background: theme.primary + '30',
             borderRadius: '12px',
             whiteSpace: 'nowrap',
             display: isSmallMobile ? 'none' : 'inline',
+            fontWeight: '600',
           }}
         >
           {theme.name} 2026
