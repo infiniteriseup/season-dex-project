@@ -2,7 +2,7 @@ import React from 'react';
 import { useTheme, type SeasonName } from '../contexts/ThemeContext';
 
 export const ThemeControls: React.FC = () => {
-  const { currentSeason, timeMode, isAutoSeason, setManualSeason, setAutoSeason, toggleTimeMode, theme } = useTheme();
+  const { currentSeason, isAutoSeason, setManualSeason, setAutoSeason, theme } = useTheme();
 
   const seasons: { name: SeasonName; icon: string; label: string }[] = [
     { name: 'spring', icon: '🌸', label: 'Spring' },
@@ -101,45 +101,6 @@ export const ThemeControls: React.FC = () => {
           🔄
         </button>
       </div>
-
-      {/* Day/Night Toggle */}
-      <button
-        onClick={toggleTimeMode}
-        title={timeMode === 'day' ? 'Switch to Night' : 'Switch to Day'}
-        style={{
-          padding: '0.4rem 0.8rem',
-          background: theme.cardBg,
-          border: `1px solid ${theme.border}`,
-          borderRadius: '12px',
-          cursor: 'pointer',
-          fontSize: '1.2rem',
-          transition: 'all 0.3s ease',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          minHeight: '36px',
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.background = theme.primary + '20';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.background = theme.cardBg;
-        }}
-      >
-        <span style={{ transition: 'transform 0.3s ease' }}>
-          {timeMode === 'day' ? '☀️' : '🌙'}
-        </span>
-        <span
-          style={{
-            fontSize: '0.75rem',
-            color: theme.textSecondary,
-            fontWeight: 'bold',
-            textTransform: 'uppercase',
-          }}
-        >
-          {timeMode === 'day' ? 'Day' : 'Night'}
-        </span>
-      </button>
     </div>
   );
 };
