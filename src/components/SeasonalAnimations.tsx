@@ -1,8 +1,8 @@
 import React from 'react';
-import { useTheme, type TimeMode } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 export const SeasonalAnimations: React.FC = () => {
-  const { currentSeason, timeMode } = useTheme();
+  const { currentSeason } = useTheme();
 
   return (
     <div
@@ -17,16 +17,16 @@ export const SeasonalAnimations: React.FC = () => {
         overflow: 'hidden',
       }}
     >
-      {currentSeason === 'spring' && <SpringAnimation timeMode={timeMode} />}
-      {currentSeason === 'summer' && <SummerAnimation timeMode={timeMode} />}
-      {currentSeason === 'fall' && <FallAnimation timeMode={timeMode} />}
-      {currentSeason === 'winter' && <WinterAnimation timeMode={timeMode} />}
+      {currentSeason === 'spring' && <SpringAnimation />}
+      {currentSeason === 'summer' && <SummerAnimation />}
+      {currentSeason === 'fall' && <FallAnimation />}
+      {currentSeason === 'winter' && <WinterAnimation />}
     </div>
   );
 };
 
 // Spring Animation - Floating petals
-const SpringAnimation: React.FC<{ timeMode: TimeMode }> = ({ timeMode }) => {
+const SpringAnimation: React.FC = () => {
   const petals = Array.from({ length: 20 }, (_, i) => i);
   
   return (
@@ -67,9 +67,7 @@ const SpringAnimation: React.FC<{ timeMode: TimeMode }> = ({ timeMode }) => {
             top: '-10vh',
             width: '10px',
             height: '10px',
-            background: timeMode === 'day' 
-              ? `rgba(255, ${150 + Math.random() * 100}, ${180 + Math.random() * 75}, 0.7)`
-              : `rgba(200, ${100 + Math.random() * 100}, ${150 + Math.random() * 75}, 0.5)`,
+            background: `rgba(255, ${150 + Math.random() * 100}, ${180 + Math.random() * 75}, 0.7)`,
             borderRadius: '50% 0 50% 0',
             animation: `float-petal ${15 + Math.random() * 10}s linear infinite, sway ${3 + Math.random() * 2}s ease-in-out infinite`,
             animationDelay: `${Math.random() * 10}s`,
@@ -81,7 +79,7 @@ const SpringAnimation: React.FC<{ timeMode: TimeMode }> = ({ timeMode }) => {
 };
 
 // Summer Animation - Sun rays and floating particles
-const SummerAnimation: React.FC<{ timeMode: TimeMode }> = ({ timeMode }) => {
+const SummerAnimation: React.FC = () => {
   const particles = Array.from({ length: 30 }, (_, i) => i);
   
   return (
@@ -114,52 +112,21 @@ const SummerAnimation: React.FC<{ timeMode: TimeMode }> = ({ timeMode }) => {
             transform: scale(1.1);
           }
         }
-        
-        @keyframes twinkle {
-          0%, 100% {
-            opacity: 0.3;
-          }
-          50% {
-            opacity: 1;
-          }
-        }
       `}</style>
       
-      {/* Sun rays or moon glow */}
-      {timeMode === 'day' ? (
-        <div
-          style={{
-            position: 'absolute',
-            top: '10%',
-            right: '10%',
-            width: '150px',
-            height: '150px',
-            background: 'radial-gradient(circle, rgba(255, 220, 100, 0.3) 0%, transparent 70%)',
-            borderRadius: '50%',
-            animation: 'pulse-glow 4s ease-in-out infinite',
-          }}
-        />
-      ) : (
-        <>
-          {/* Stars */}
-          {Array.from({ length: 50 }, (_, i) => (
-            <div
-              key={`star-${i}`}
-              style={{
-                position: 'absolute',
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                width: '2px',
-                height: '2px',
-                background: 'white',
-                borderRadius: '50%',
-                animation: `twinkle ${2 + Math.random() * 3}s ease-in-out infinite`,
-                animationDelay: `${Math.random() * 3}s`,
-              }}
-            />
-          ))}
-        </>
-      )}
+      {/* Sun rays */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '10%',
+          right: '10%',
+          width: '150px',
+          height: '150px',
+          background: 'radial-gradient(circle, rgba(255, 220, 100, 0.3) 0%, transparent 70%)',
+          borderRadius: '50%',
+          animation: 'pulse-glow 4s ease-in-out infinite',
+        }}
+      />
       
       {/* Floating particles */}
       {particles.map((i) => (
@@ -171,9 +138,7 @@ const SummerAnimation: React.FC<{ timeMode: TimeMode }> = ({ timeMode }) => {
             bottom: '-10vh',
             width: `${3 + Math.random() * 5}px`,
             height: `${3 + Math.random() * 5}px`,
-            background: timeMode === 'day'
-              ? `rgba(255, ${200 + Math.random() * 55}, 100, 0.4)`
-              : `rgba(150, 150, 200, 0.3)`,
+            background: `rgba(255, ${200 + Math.random() * 55}, 100, 0.4)`,
             borderRadius: '50%',
             animation: `float-up ${20 + Math.random() * 15}s linear infinite`,
             animationDelay: `${Math.random() * 10}s`,
@@ -185,7 +150,7 @@ const SummerAnimation: React.FC<{ timeMode: TimeMode }> = ({ timeMode }) => {
 };
 
 // Fall Animation - Falling leaves
-const FallAnimation: React.FC<{ timeMode: TimeMode }> = ({ timeMode }) => {
+const FallAnimation: React.FC = () => {
   const leaves = Array.from({ length: 25 }, (_, i) => i);
   
   return (
@@ -221,9 +186,7 @@ const FallAnimation: React.FC<{ timeMode: TimeMode }> = ({ timeMode }) => {
         }
       `}</style>
       {leaves.map((i) => {
-        const leafColors = timeMode === 'day'
-          ? ['rgba(255, 140, 0, 0.7)', 'rgba(218, 165, 32, 0.7)', 'rgba(139, 69, 19, 0.7)', 'rgba(205, 92, 92, 0.7)']
-          : ['rgba(200, 100, 0, 0.5)', 'rgba(180, 130, 30, 0.5)', 'rgba(100, 50, 10, 0.5)', 'rgba(150, 70, 70, 0.5)'];
+        const leafColors = ['rgba(255, 140, 0, 0.7)', 'rgba(218, 165, 32, 0.7)', 'rgba(139, 69, 19, 0.7)', 'rgba(205, 92, 92, 0.7)'];
         
         return (
           <div
@@ -247,7 +210,7 @@ const FallAnimation: React.FC<{ timeMode: TimeMode }> = ({ timeMode }) => {
 };
 
 // Winter Animation - Falling snowflakes
-const WinterAnimation: React.FC<{ timeMode: TimeMode }> = ({ timeMode }) => {
+const WinterAnimation: React.FC = () => {
   const snowflakes = Array.from({ length: 50 }, (_, i) => i);
   
   return (
@@ -299,13 +262,9 @@ const WinterAnimation: React.FC<{ timeMode: TimeMode }> = ({ timeMode }) => {
               top: '-10vh',
               width: `${size}px`,
               height: `${size}px`,
-              background: timeMode === 'day' 
-                ? 'rgba(255, 255, 255, 0.9)'
-                : 'rgba(200, 220, 255, 0.7)',
+              background: 'rgba(255, 255, 255, 0.9)',
               borderRadius: '50%',
-              boxShadow: timeMode === 'day'
-                ? '0 0 5px rgba(255, 255, 255, 0.8)'
-                : '0 0 5px rgba(150, 180, 255, 0.6)',
+              boxShadow: '0 0 5px rgba(255, 255, 255, 0.8)',
               animation: `fall-snow ${15 + Math.random() * 10}s linear infinite, drift ${3 + Math.random() * 2}s ease-in-out infinite, shimmer ${2 + Math.random()}s ease-in-out infinite`,
               animationDelay: `${Math.random() * 10}s`,
             }}
