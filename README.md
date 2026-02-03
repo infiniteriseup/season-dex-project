@@ -46,6 +46,7 @@ npm run build
 - **Phantom**: Full Solana support
 - Auto-reconnect on page refresh
 - Balance display and transaction tracking
+- **Secure**: All connections require wallet approval (see [WALLET_SECURITY.md](WALLET_SECURITY.md))
 
 ---
 
@@ -243,6 +244,22 @@ npm run dev
 ### Buffer/Polyfill Errors
 Already fixed! The project uses `vite-plugin-node-polyfills` to handle all Node.js polyfills automatically.
 
+### Phantom Wallet Connection Error (403 Forbidden)
+**Problem**: "Error: failed to get balance of account" or 403 errors when connecting Phantom.
+
+**Cause**: Public Solana mainnet RPC has strict rate limits.
+
+**Solution**: The app now uses Solana devnet by default (more reliable). For mainnet:
+
+1. Get a free RPC API key from [Helius](https://www.helius.dev/) (100 req/sec free tier)
+2. Create `.env` file:
+   ```bash
+   VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
+   ```
+3. Restart dev server
+
+**Alternative**: Use devnet (default) - wallet will connect successfully even if balance shows 0.
+
 ### Wallet Not Connecting
 - Install MetaMask: https://metamask.io/
 - Install Phantom: https://phantom.app/
@@ -257,6 +274,7 @@ Already fixed! The project uses `vite-plugin-node-polyfills` to handle all Node.
 
 ## 📚 Additional Documentation
 
+- **[WALLET_SECURITY.md](WALLET_SECURITY.md)** - 🔐 Wallet security & connection flow explained
 - **[QUICK_START.md](QUICK_START.md)** - Quick start guide
 - **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Detailed setup instructions
 - **[PROJECT_OVERVIEW.md](PROJECT_OVERVIEW.md)** - Technical architecture
