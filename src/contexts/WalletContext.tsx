@@ -36,16 +36,31 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         return;
       }
 
+      // Check if MetaMask is locked
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts.length === 0) {
+        console.log('🔐 MetaMask is locked or not connected. Requesting connection...');
+      }
+
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const accounts = await provider.send('eth_requestAccounts', []);
+      
+      // This ALWAYS triggers MetaMask popup for approval if not already connected
+      // User must:
+      // 1. Unlock MetaMask with password (if locked)
+      // 2. Click "Connect" to approve this site
+      // 3. Select which accounts to connect
+      console.log('🔐 Requesting MetaMask connection approval...');
+      const requestedAccounts = await provider.send('eth_requestAccounts', []);
+      console.log('✅ User approved MetaMask connection');
+      
       const network = await provider.getNetwork();
-      const balance = await provider.getBalance(accounts[0]);
+      const balance = await provider.getBalance(requestedAccounts[0]);
 
       // Initialize DEX service for Ethereum
       await dexService.initializeEthereum(provider);
 
       setWallet({
-        address: accounts[0],
+        address: requestedAccounts[0],
         chainId: Number(network.chainId),
         balance: ethers.formatEther(balance),
         connected: true,
@@ -53,9 +68,17 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       });
 
       console.log('✅ MetaMask connected and DEX service initialized');
-    } catch (error) {
+    } catch (error: any) {
       console.error('MetaMask connection error:', error);
-      alert('Failed to connect to MetaMask');
+      
+      // Handle specific error cases
+      if (error.code === 4001) {
+        alert('Connection rejected. You must approve the connection in MetaMask to continue.');
+      } else if (error.code === -32002) {
+        alert('Connection request already pending. Please check your MetaMask extension.');
+      } else {
+        alert('Failed to connect to MetaMask. Please make sure MetaMask is unlocked and try again.');
+      }
     } finally {
       setIsConnecting(false);
     }
@@ -71,33 +94,77 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         return;
       }
 
+      // Check if Phantom is already connected
+      if (!solana.isConnected) {
+        console.log('🔐 Phantom is not connected. Requesting connection...');
+      }
+
+      // This ALWAYS triggers Phantom popup for approval if not already connected
+      // User must:
+      // 1. Unlock Phantom with password (if locked)
+      // 2. Click "Connect" to approve this site
+      // 3. Approve the connection request
+      console.log('🔐 Requesting Phantom connection approval...');
       const response = await solana.connect();
+      console.log('✅ User approved Phantom connection');
+      
       const publicKey = response.publicKey.toString();
       
-      const connection = new Connection(clusterApiUrl('mainnet-beta'));
-      const balance = await connection.getBalance(new PublicKey(publicKey));
+      // Use environment variable RPC or fallback to devnet (more reliable than mainnet public RPC)
+      const rpcEndpoint = import.meta.env.VITE_SOLANA_RPC_URL || clusterApiUrl('devnet');
+      const connection = new Connection(rpcEndpoint, {
+        commitment: 'confirmed',
+        confirmTransactionInitialTimeout: 60000,
+      });
+
+      // Try to get balance, but don't fail connection if it errors
+      let balance = '0';
+      try {
+        const balanceLamports = await connection.getBalance(new PublicKey(publicKey));
+        balance = (balanceLamports / 1e9).toString();
+      } catch (balanceError) {
+        console.warn('⚠️ Could not fetch balance (RPC rate limit), but wallet connected:', balanceError);
+        // Balance will remain '0' but connection succeeds
+      }
 
       // Initialize DEX service for Solana
-      dexService.initializeSolana(clusterApiUrl('mainnet-beta'));
+      dexService.initializeSolana(rpcEndpoint);
 
       setWallet({
         address: publicKey,
         chainId: null,
-        balance: (balance / 1e9).toString(),
+        balance,
         connected: true,
         walletType: 'phantom',
       });
 
       console.log('✅ Phantom connected and DEX service initialized');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Phantom connection error:', error);
-      alert('Failed to connect to Phantom');
+      
+      // Handle specific error cases
+      if (error.code === 4001 || error.message?.includes('User rejected')) {
+        alert('Connection rejected. You must approve the connection in Phantom to continue.');
+      } else if (error.code === -32002) {
+        alert('Connection request already pending. Please check your Phantom extension.');
+      } else {
+        alert('Failed to connect to Phantom. Please make sure Phantom is unlocked and try again.');
+      }
     } finally {
       setIsConnecting(false);
     }
   };
 
   const disconnect = () => {
+    // Explicitly disconnect from wallets to clear cached approvals
+    if (wallet.walletType === 'phantom') {
+      const { solana } = window as any;
+      if (solana?.isPhantom && solana.isConnected) {
+        solana.disconnect();
+        console.log('🔌 Phantom disconnected (cached approval cleared)');
+      }
+    }
+    
     setWallet(initialWalletState);
     console.log('🔌 Wallet disconnected');
   };
